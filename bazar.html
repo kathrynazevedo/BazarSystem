@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bazar Beneficente</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Great+Vibes&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ffffff;
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, #153a5e, #0f2741);
+            color: white;
+            width: 250px;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            border-top-right-radius: 30px;
+            border-bottom-right-radius: 30px;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar h3 {
+            margin: 10px 0;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar > p {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .sidebar .categoria p {
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .main h1 {
+            font-size: 64px;
+            margin-bottom: 0;
+            font-family: 'Playfair Display', serif;
+            color: #143153;
+            line-height: 1;
+        }
+
+        .main h2 {
+            font-weight: normal;
+            font-size: 36px;
+            margin-top: -10px;
+            margin-bottom: 30px;
+            font-family: 'Great Vibes', cursive;
+            color: #143153;
+            line-height: 1;
+        }
+
+        .form {
+            background-color: #ccc;
+            padding: 30px;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 400px;
+        }
+
+        .form label {
+            font-weight: bold;
+        }
+
+        .form select, .form input[type="number"], .form input[type="text"] {
+            padding: 10px;
+            border: none;
+            border-radius: 20px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .form-row select {
+            flex: 2;
+        }
+
+        .form-row input {
+            flex: 1;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .finalizar {
+            background-color: #44d12d;
+            color: white;
+        }
+
+        .apagar {
+            background-color: #143153;
+            color: white;
+        }
+
+        #adicionar-item {
+            background-color: #143153;
+            border-radius: 20px;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        #btn-historico, #btn-estoque {
+            background-color: white;
+            color: #143153;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #btn-historico i, #btn-estoque i {
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h3>Peças disponíveis</h3>
+        <p id="total-pecas">0</p>
+        <div class="categoria">
+            <h3>Categoria:</h3>
+            <!-- Categorias preenchidas pelo JS -->
+        </div>
+        <button id="btn-historico" onclick="location.href='historico.html'"><i class='bx bx-receipt'></i> Histórico</button>
+        <button id="btn-estoque" onclick="location.href='estoque.html'"><i class='bx bx-package'></i> Estoque</button>
+    </div>
+
+    <div class="main">
+        <h1>BAZAR</h1>
+        <h2>beneficente</h2>
+        <form class="form">
+            <div id="itens-container"></div>
+        
+            <button type="button" id="adicionar-item" class="apagar" style="margin-top: 10px;">Adicionar peça</button>
+
+            <label for="descricao">DESCRIÇÃO (opcional)</label>
+            <input type ="text" id="descricao" name="descricao" placeholder="Ex: Cliente pediu para separar...">
+            
+            <label for="valor">VALOR</label>
+            <input type="text" id="valor" name="valor" placeholder="R$">
+        
+            <label for="pagamento">FORMA DE PAGAMENTO</label>
+            <select id="pagamento" name="pagamento">
+                <option value="Dinheiro">Dinheiro</option>
+                <option value="Pix">Pix</option>
+                <option value="Crédito/Débito">Crédito/Débito</option>
+                <option value="Outro">Outro</option>
+            </select>
+        
+            <div class="buttons">
+                <button type="submit" class="finalizar">FINALIZAR</button>
+                <button type="reset" class="apagar">APAGAR</button>
+            </div>
+        </form>
+        
+    <script src="script.js"></script>
+</body>
+</html>

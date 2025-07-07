@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Histórico de Vendas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+      background-color: #f7f7f7;
+    }
+
+    h1 {
+      color: #143153;
+      text-align: center;
+    }
+
+    #desfazer-container {
+      display: none;
+      background-color: #f8e0a3;
+      color: #333;
+      padding: 10px 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    #desfazer-container button {
+      margin-left: 10px;
+      background-color: #143153;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .filtros {
+      display: flex;
+      gap: 20px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+
+    .filtros label {
+      font-weight: bold;
+      margin-right: 5px;
+    }
+
+    .filtros input, .filtros select {
+      padding: 6px 10px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      background-color: #ffffff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 12px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #143153;
+      color: white;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: #eee;
+    }
+
+    .total {
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .voltar-btn {
+      margin-top: 30px;
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #143153;
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+    }
+
+    .excluir-btn {
+      padding: 6px 12px;
+      background-color: #c0392b;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .excluir-btn:hover {
+      background-color: #a5281e;
+    }
+  </style>
+</head>
+<body>
+  <h1>Histórico de Vendas</h1>
+
+  <div id="desfazer-container">
+    Venda excluída. <button onclick="desfazerExclusao()">Desfazer</button>
+  </div>
+
+  <div class="filtros">
+    <div>
+      <label for="filtro-data">Data:</label>
+      <input type="date" id="filtro-data">
+    </div>
+    <div>
+      <label for="filtro-pagamento">Pagamento:</label>
+      <select id="filtro-pagamento">
+        <option value="">Todos</option>
+        <option value="Dinheiro">Dinheiro</option>
+        <option value="Pix">Pix</option>
+        <option value="Crédito/Débito">Crédito/Débito</option>
+        <option value="Outro">Outro</option>
+      </select>
+    </div>
+    <div>
+      <label for="filtro-categoria">Categoria:</label>
+      <input type="text" id="filtro-categoria" placeholder="Ex: Calças">
+    </div>
+    <button onclick="carregarVendas()">Filtrar</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Itens Vendidos</th>
+        <th>Valor</th>
+        <th>Forma de Pagamento</th>
+        <th>Descrição</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody id="vendas-tabela"></tbody>
+  </table>
+
+  <p class="total" id="total-arrecadado"></p>
+  <a href="bazar.html" class="voltar-btn">&larr; Voltar</a>
+
+  <script>
+    let ultimaVendaRemovida = null;
+    let indexRemovido = null;
+    let timeoutDesfazer = null;
+
+    function carregarVendas() {
+      const filtroData = document.getElementById("filtro-data").value;
+      const filtroPagamento = document.getElementById("filtro-pagamento").value;
+      const filtroCategoria = document.getElementById("filtro-categoria").value.toLowerCase();
+
+      const vendas = JSON.parse(localStorage.getItem("vendas")) || [];
+      const tbody = document.getElementById("vendas-tabela");
+      const totalArrecadado = document.getElementById("total-arrecadado");
+
+      tbody.innerHTML = "";
+      let total = 0;
+
+      vendas.forEach((venda, index) => {
+        const dataVenda = new Date(venda.data);
+        const dataFiltro = filtroData ? new Date(filtroData) : null;
+        const correspondeData = !dataFiltro || (dataVenda.toDateString() === dataFiltro.toDateString());
+        const correspondePagamento = !filtroPagamento || venda.pagamento === filtroPagamento;
+        const correspondeCategoria = !filtroCategoria || venda.vendidos.some(v => v.peca.toLowerCase().includes(filtroCategoria));
+
+        if (!(correspondeData && correspondePagamento && correspondeCategoria)) return;
+
+        const row = document.createElement("tr");
+        const tdData = document.createElement("td");
+        tdData.textContent = venda.data;
+        row.appendChild(tdData);
+
+        const tdItens = document.createElement("td");
+        tdItens.innerHTML = venda.vendidos.map(item => `${item.quantidade}x ${item.peca}`).join("<br>");
+        row.appendChild(tdItens);
+
+        const tdValor = document.createElement("td");
+        tdValor.textContent = `R$ ${venda.valor.toFixed(2).replace('.', ',')}`;
+        row.appendChild(tdValor);
+
+        const tdPagamento = document.createElement("td");
+        tdPagamento.textContent = venda.pagamento;
+        row.appendChild(tdPagamento);
+
+        const tdDescricao = document.createElement("td");
+        tdDescricao.textContent = venda.descricao || "-";
+        row.appendChild(tdDescricao);
+
+        const tdAcoes = document.createElement("td");
+        const btnExcluir = document.createElement("button");
+        btnExcluir.textContent = "Excluir";
+        btnExcluir.className = "excluir-btn";
+        btnExcluir.onclick = () => excluirVenda(index);
+        tdAcoes.appendChild(btnExcluir);
+        row.appendChild(tdAcoes);
+
+        tbody.appendChild(row);
+
+        total += venda.valor;
+      });
+
+      totalArrecadado.textContent = `Total arrecadado: R$ ${total.toFixed(2).replace('.', ',')}`;
+    }
+
+    function excluirVenda(index) {
+      if (confirm("Tem certeza que deseja excluir essa venda?")) {
+        let vendas = JSON.parse(localStorage.getItem("vendas")) || [];
+        ultimaVendaRemovida = vendas.splice(index, 1)[0];
+        indexRemovido = index;
+
+        let estoque = JSON.parse(localStorage.getItem("estoque")) || {};
+        ultimaVendaRemovida.vendidos.forEach(item => {
+          estoque[item.peca] = (estoque[item.peca] || 0) + item.quantidade;
+        });
+
+        localStorage.setItem("vendas", JSON.stringify(vendas));
+        localStorage.setItem("estoque", JSON.stringify(estoque));
+        carregarVendas();
+
+        document.getElementById("desfazer-container").style.display = "block";
+        clearTimeout(timeoutDesfazer);
+        timeoutDesfazer = setTimeout(() => {
+          document.getElementById("desfazer-container").style.display = "none";
+          ultimaVendaRemovida = null;
+          indexRemovido = null;
+        }, 10000);
+      }
+    }
+
+    function desfazerExclusao() {
+      if (ultimaVendaRemovida && indexRemovido !== null) {
+        let vendas = JSON.parse(localStorage.getItem("vendas")) || [];
+        let estoque = JSON.parse(localStorage.getItem("estoque")) || {};
+
+        ultimaVendaRemovida.vendidos.forEach(item => {
+          estoque[item.peca] -= item.quantidade;
+        });
+
+        vendas.splice(indexRemovido, 0, ultimaVendaRemovida);
+        localStorage.setItem("vendas", JSON.stringify(vendas));
+        localStorage.setItem("estoque", JSON.stringify(estoque));
+
+        carregarVendas();
+        document.getElementById("desfazer-container").style.display = "none";
+        ultimaVendaRemovida = null;
+        indexRemovido = null;
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", carregarVendas);
+  </script>
+</body>
+</html>

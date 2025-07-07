@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Controle de Estoque</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f6f8fa;
+      padding: 40px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #143153;
+    }
+
+    .estoque-container {
+      max-width: 600px;
+      margin: 30px auto;
+      background-color: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    .item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .item input[type="number"] {
+      width: 80px;
+      padding: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    .item span {
+      font-weight: bold;
+      flex: 1;
+    }
+
+    .novo-item {
+      margin-top: 30px;
+      border-top: 1px solid #ccc;
+      padding-top: 20px;
+    }
+
+    .novo-item input {
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-right: 10px;
+    }
+
+    button {
+      padding: 8px 15px;
+      background-color: #143153;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .limpar {
+      background-color: #d63737;
+      margin-top: 20px;
+    }
+
+    .voltar {
+      display: inline-block;
+      margin-top: 30px;
+      text-decoration: none;
+      background-color: #143153;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Estoque</h1>
+
+  <div class="estoque-container" id="estoque-container"></div>
+
+  <div class="estoque-container novo-item">
+    <h3>Adicionar nova categoria</h3>
+    <input type="text" id="nova-categoria" placeholder="Nome da categoria" />
+    <input type="number" id="nova-quantidade" placeholder="Quantidade" />
+    <button onclick="adicionarCategoria()">Adicionar</button>
+  </div>
+
+  <div class="estoque-container">
+    <button onclick="salvarEstoque()">Salvar Alterações</button>
+    <button class="limpar" onclick="limparEstoque()">Zerar Estoque</button>
+    <br>
+    <a href="bazar.html" class="voltar">← Voltar</a>
+  </div>
+
+  <script>
+    const estoqueContainer = document.getElementById("estoque-container");
+
+    function carregarEstoque() {
+      const estoque = JSON.parse(localStorage.getItem("estoque")) || {};
+      estoqueContainer.innerHTML = "";
+
+      for (const categoria in estoque) {
+        const div = document.createElement("div");
+        div.classList.add("item");
+
+        const span = document.createElement("span");
+        span.textContent = categoria;
+
+        const input = document.createElement("input");
+        input.type = "number";
+        input.value = estoque[categoria];
+        input.dataset.categoria = categoria;
+
+        div.appendChild(span);
+        div.appendChild(input);
+        estoqueContainer.appendChild(div);
+      }
+    }
+
+    function salvarEstoque() {
+      const inputs = document.querySelectorAll(".item input");
+      const novoEstoque = {};
+
+      inputs.forEach(input => {
+        const categoria = input.dataset.categoria;
+        const quantidade = parseInt(input.value);
+        if (categoria && !isNaN(quantidade)) {
+          novoEstoque[categoria] = quantidade;
+        }
+      });
+
+      localStorage.setItem("estoque", JSON.stringify(novoEstoque));
+      alert("Estoque atualizado com sucesso!");
+    }
+
+    function adicionarCategoria() {
+      const nome = document.getElementById("nova-categoria").value.trim();
+      const qtd = parseInt(document.getElementById("nova-quantidade").value);
+
+      if (!nome || isNaN(qtd) || qtd < 0) {
+        alert("Preencha corretamente o nome e a quantidade.");
+        return;
+      }
+
+      const estoque = JSON.parse(localStorage.getItem("estoque")) || {};
+      estoque[nome] = qtd;
+      localStorage.setItem("estoque", JSON.stringify(estoque));
+
+      document.getElementById("nova-categoria").value = "";
+      document.getElementById("nova-quantidade").value = "";
+
+      carregarEstoque();
+    }
+
+    function limparEstoque() {
+      if (confirm("Tem certeza que deseja zerar o estoque?")) {
+        localStorage.setItem("estoque", JSON.stringify({}));
+        carregarEstoque();
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", carregarEstoque);
+  </script>
+
+</body>
+</html>
