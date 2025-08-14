@@ -77,6 +77,11 @@ projeto de extensão
 
 Desenvolvido por Kathryn Azevedo ✨  
 
+---
+## 🛑 Termos de Uso
+
+**Este projeto foi criado apenas para fins acadêmicos. Qualquer reprodução, redistribuição ou uso parcial/total sem autorização está estritamente proibido.**
+ 
 
 
 
